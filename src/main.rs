@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::env;
 use std::error::Error;
 use std::fs::File;
+use std::io;
 
 #[derive(Debug, Deserialize, PartialEq)]
 struct Bank {
@@ -67,7 +68,6 @@ impl Bank {
         // Get file paths
         let args: Vec<String> = env::args().collect();
         let input_path = &args[1];
-        let output_path = &args[2];
 
         // Open file
         let rdr = ReaderBuilder::new().trim(Trim::All).from_path(input_path)?;
@@ -76,7 +76,7 @@ impl Bank {
         self.process_txs(rdr)?;
 
         // Output file
-        let mut wtr = Writer::from_path(output_path)?;
+        let mut wtr = Writer::from_writer(io::stdout());
         for (_, client) in self.clients.iter() {
             wtr.serialize(client)?;
             wtr.flush()?;
